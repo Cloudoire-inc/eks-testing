@@ -28,16 +28,16 @@ resource "aws_eip" "nat" {
   vpc = true
 
   tags = {
-    Name = "nat"
+    Name = "eip-nat"
   }
 }
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public-us-east-1a.id
+  subnet_id     = aws_subnet.public-eu-central-1a.id
 
   tags = {
-    Name = "nat"
+    Name = " NatGateway_EKS_Demo"
   }
 
   depends_on = [aws_internet_gateway.igw]
@@ -45,54 +45,79 @@ resource "aws_nat_gateway" "nat" {
 
 
 
-resource "aws_subnet" "private-us-east-1a" {
+resource "aws_subnet" "private-eu-central-1a" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
+  cidr_block        = "10.0.4.0/24"
+  availability_zone = "eu-central-1a"
 
   tags = {
-    "Name"                            = "private-us-east-1a"
+    "Name"                            = "private-eu-central-1a"
     "kubernetes.io/role/internal-elb" = "1"
-    "kubernetes.io/cluster/demo"      = "owned"
+    "kubernetes.io/cluster/tf-eks-wetravel"      = "owned"
   }
 }
 
-resource "aws_subnet" "private-us-east-1b" {
+resource "aws_subnet" "private-eu-central-1b" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
+  cidr_block        = "10.0.4.0/24"
+  availability_zone = "eu-central-1b"
   tags = {
-    "Name"                            = "private-us-east-1b"
+    "Name"                            = "private-eu-central-1b"
     "kubernetes.io/role/internal-elb" = "1"
-    "kubernetes.io/cluster/demo"      = "owned"
+    "kubernetes.io/cluster/tf-eks-wetravel"      = "owned"
   }
 }
 
-resource "aws_subnet" "public-us-east-1a" {
+resource "aws_subnet" "private-eu-central-1c" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.4.0/24"
+  availability_zone = "eu-central-1c"
+  tags = {
+    "Name"                            = "private-eu-central-1c"
+    "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/cluster/tf-eks-wetravel"      = "owned"
+  }
+}
+
+resource "aws_subnet" "public-eu-central-1a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.3.0/24"
-  availability_zone       = "us-east-1a"
+  cidr_block              = "10.0.0.0/24"
+  availability_zone       = "eu-central-1a"
   map_public_ip_on_launch = true
 
   tags = {
-    "Name"                       = "public-us-east-1a"
+    "Name"                       = "public-eu-central-1a"
     "kubernetes.io/role/elb"     = "1"
-    "kubernetes.io/cluster/demo" = "owned"
+    "kubernetes.io/cluster/tf-eks-wetravel" = "shared"
   }
 }
 
-resource "aws_subnet" "public-us-east-1b" {
+resource "aws_subnet" "public-eu-central-1b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.4.0/24"
-  availability_zone       = "us-east-1b"
+  availability_zone       = "eu-central-1b"
   map_public_ip_on_launch = true
 
   tags = {
-    "Name"                       = "public-us-east-11b"
+    "Name"                       = "public-eu-central-1b"
     "kubernetes.io/role/elb"     = "1"
-    "kubernetes.io/cluster/demo" = "owned"
+    "kubernetes.io/cluster/tf-eks-wetravel" = "shared"
   }
 }
+
+resource "aws_subnet" "public-eu-central-1c" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.5.0/24"
+  availability_zone       = "eu-central-1c"
+  map_public_ip_on_launch = true
+
+  tags = {
+    "Name"                       = "public-eu-central-1c"
+    "kubernetes.io/role/elb"     = "1"
+    "kubernetes.io/cluster/tf-eks-wetravel" = "shared"
+  }
+}
+
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
@@ -125,25 +150,34 @@ resource "aws_route_table" "public" {
   }
 }
 
-resource "aws_route_table_association" "private-us-east-1a" {
-  subnet_id      = aws_subnet.private-us-east-1a.id
+resource "aws_route_table_association" "private-eu-central-1a" {
+  subnet_id      = aws_subnet.private-eu-central-1a.id
   route_table_id = aws_route_table.private.id
 }
 
-resource "aws_route_table_association" "private-us-east-1b" {
-  subnet_id      = aws_subnet.private-us-east-1b.id
+resource "aws_route_table_association" "private-eu-central-1b" {
+  subnet_id      = aws_subnet.private-eu-central-1b.id
   route_table_id = aws_route_table.private.id
 }
 
-resource "aws_route_table_association" "public-us-east-1a" {
-  subnet_id      = aws_subnet.public-us-east-1a.id
+resource "aws_route_table_association" "private-eu-central-1c" {
+  subnet_id      = aws_subnet.private-eu-central-1c.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "public-eu-central-1a" {
+  subnet_id      = aws_subnet.public-eu-central-1a.id
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_route_table_association" "public-us-east-1b" {
-  subnet_id      = aws_subnet.public-us-east-1b.id
+resource "aws_route_table_association" "public-eu-central-1b" {
+  subnet_id      = aws_subnet.public-eu-central-1b.id
   route_table_id = aws_route_table.public.id
 }
 
+resource "aws_route_table_association" "public-eu-central-1c" {
+  subnet_id      = aws_subnet.public-eu-central-1c.id
+  route_table_id = aws_route_table.public.id
+}
 
 
